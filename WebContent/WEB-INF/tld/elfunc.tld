@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee [url]http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd[/url]"  
+    version="2.0">  
+    <tlib-version>1.0</tlib-version>  
+    <short-name>elf</short-name>  
+    <function>  
+        <description>用于连接两个字符串</description>  
+        <name>append</name>  
+        <function-class>com.lcl.tld.ELFuncUtil</function-class>  
+        <function-signature>java.lang.String append(java.lang.String,java.lang.String)</function-signature>  
+        <example>${elf:append(str1, str2)}</example>  
+    </function>  
+    <function>  
+        <description>檢查是否退出</description>  
+        <name>isForceLogout</name>  
+        <function-class>com.lcl.tld.ELFuncUtil</function-class>  
+        <function-signature>java.lang.Boolean isForceLogout(org.apache.shiro.session.Session)</function-signature>  
+        <example>${elf:isForceLogout(Session)}</example>  
+    </function>  
+    <function>  
+        <description>檢查是否登录</description>  
+        <name>isLogin</name>  
+        <function-class>com.lcl.tld.ELFuncUtil</function-class>  
+        <function-signature>java.lang.Boolean isLogin(org.apache.shiro.session.Session)</function-signature>  
+        <example>${elf:isLogin(Session)}</example>  
+    </function>  
+</taglib>  

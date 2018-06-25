@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ctx="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd ">
+
+	
+	<!-- shiro 权限配置 -->
+	
+	<!--  session会话管理  -->
+	<bean id="sessionDAO" class="org.apache.shiro.session.mgt.eis.MemorySessionDAO"/>
+
+	<bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+	
+		<property name="sessionDAO" ref="sessionDAO"/>
+	
+	</bean>
+	
+		<!-- 配置Realm -->
+	<bean id="userRealms" class="com.lcl.shiro.UserRealm" >
+	</bean>
+	
+		<!-- shiro 框架安全管理器 -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		 <property name="realm" ref="userRealms" /> 
+<!-- 		 <property name="cacheManager" ref="shiroCacheManager" /> -->
+
+		<property name="sessionManager" ref="sessionManager" />
+		
+		
+	</bean>
+	
+	
+		<!-- shiro 权限过滤 id要与web.xml 的fitler name一样 -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager" />
+		<!-- 默认配置的地址 -->
+		<property name="loginUrl" value="/login" /> <!-- 登录 地址 -->
+		<property name="successUrl" value="/index" /> <!-- 登录成功的地址 -->
+		<property name="unauthorizedUrl" value="/error/unauth" /> <!-- 权限不对跳转的地址 -->
+		<!-- shiro 权限过滤设置 -->
+ 	 	<property name="filters">
+			<map>
+				<entry key="perms">
+					<bean class="com.lcl.shiro.PermsFitler"></bean>
+				</entry>
+			</map>
+		</property>  
+
+		<property name="filterChainDefinitions">
+			<!-- 过滤规则 anon 表示不经过验证过滤，直接放行 authc 表示必须经过登录验证 -->
+			<value>
+				/login* = anon
+				/admin/** = anon
+				/error/** = anon
+				/code = anon
+				/static/** = anon
+				/delete/** = anon
+				/** = authc <!-- 访问需要登录-->
+				/** = perms <!-- 权限过滤器 (没写自定义过滤器类不能添加此规则 /** = perms )-->
+			</value>
+		</property>
+	</bean>
+	
+	    <!-- Shiro生命周期处理器-->
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+
+</beans>

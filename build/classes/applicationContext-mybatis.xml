@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:ctx="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans.xsd 
+	http://www.springframework.org/schema/context 
+	http://www.springframework.org/schema/context/spring-context.xsd 
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx.xsd 
+	http://www.springframework.org/schema/aop 
+	http://www.springframework.org/schema/aop/spring-aop.xsd ">
+
+	<ctx:component-scan base-package="com.lcl.service.impl" />
+	   <!--采用这种方式简化配置文件  多个文件classpath:cfg.properties,classpath:cfg2.properties-->
+    <ctx:property-placeholder location="classpath:jdbc.properties,classpath:redis.properties"/>
+
+
+	<!-- mybatis 数据库 -->
+	<bean id="dataSource" class="com.mysql.jdbc.jdbc2.optional.MysqlDataSource">
+		<property name="url" value="jdbc:mysql://${jdbc.host}:${jdbc.port}/${jdbc.database}"></property>
+		<property name="user" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean>
+	<bean class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<!-- mybatis 实体别名 -->
+		<property name="typeAliasesPackage" value="com.lcl.entity"/>
+		<!-- 配置mybatis核心配置文件  如果 mybatis配置单独配置 加这句加载配置文件 不然下面配置属性 -->
+<!-- 		<property name="configLocation" value="classpath:SqlMapConfig.xml" /> -->
+		<property name="configurationProperties">
+			<value>
+				lazyLoadingEnabled=true		<!-- 懒加载 -->
+				aggressiveLazyLoading=false
+			</value>
+		</property>
+		<!-- mybatis 插件 -->
+		<property name="plugins">
+			<array>
+			<!-- mybatis 分页插件 -->
+				<bean class="com.github.pagehelper.PageHelper">
+					<property name="properties">
+						<value>
+							dialect=mysql
+							reasonable=true
+							rowBoundsWithCount=true
+						</value>
+					</property>
+				</bean>
+				
+			</array>
+		</property>
+	</bean>
+	<!-- mybatis 映射文件设置 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.lcl.mapper"></property>
+	</bean>
+
+
+	<!-- 全局异常处理 -->
+
+	 <bean class="com.lcl.resolver.FileErrorsResolver"> 
+	 	<property 
+			name="order" value="0">
+		</property> 
+	 </bean> 
+
+	<!-- mybatis/jdbc事物管理 （使用事物）-->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+<!-- 开启事务控制的注解支持 -->  
+	<!-- 事物管理 （开启）-->
+	<tx:annotation-driven />
+	<!-- 事物管理 （调用）-->
+	<tx:advice id="myad" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="query*" read-only="true" />
+			<tx:method name="find*" read-only="true" />
+			<tx:method name="add*" />
+			<tx:method name="edit*" />
+			<tx:method name="del*" />
+		</tx:attributes>
+	</tx:advice>
+	<!-- aop切面设置 -->
+	<aop:config>
+		<aop:advisor advice-ref="myad"
+			pointcut="execution(* com.lcl.service.*.*(..))" />
+	</aop:config>
+	
+	<!-- shiro 权限配置 -->
+	
+
+
+</beans>
